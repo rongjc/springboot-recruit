@@ -6,6 +6,7 @@ import lombok.Data;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 /**
  * 任务投标视图展示对象
@@ -28,21 +29,6 @@ public class BidVo implements Serializable {
     private Employee employee;
 
     /**
-     * 投标价格
-     */
-    private Double bidPrice;
-
-    /**
-     * 交货时间描述
-     */
-    private String deliveryDesc;
-
-    /**
-     * 交货时间
-     */
-    private String deliveryTime;
-
-    /**
      * 竞标状态，0 未中标，1 已中标
      */
     private Byte bidStatus;
@@ -56,4 +42,6 @@ public class BidVo implements Serializable {
      * 竞标任务信息
      */
     private Task task;
+
+    private List<Employee> referrer;
 }

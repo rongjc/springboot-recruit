@@ -88,30 +88,18 @@ public class BidServiceImpl implements BidService {
 
     @Override
     public void acceptBid(Long taskId, Long employeeId) {
-        // 先查询任务信息
-        Task task = taskMapper.selectByPrimaryKey(taskId);
-        // 设置中标雇员信息
-        task.setEmployeeId(employeeId);
-        // 设置任务状态
-        task.setTaskStatus(TaskStatus.BIT);
-        // 设置中标时间
-        task.setBidTime(new Date());
-        // 查询投标信息，获取投标价格
-        Example example = new Example(Bid.class);
-        example.createCriteria().andEqualTo("taskId", taskId)
-                .andEqualTo("employeeId",employeeId);
-        Bid bid = bidMapper.selectOneByExample(example);
-        // 设置中标价格
-        task.setTaskPrice(bid.getBidPrice());
-        // 更新到数据库
-        taskMapper.updateByPrimaryKey(task);
+        // 修改竞标状态
+        changeBidStatus(taskId, employeeId, BidStatus.BIT);
+    }
 
+    @Override
+    public void changeBidStatus(Long taskId, Long employeeId, Byte bidStatus) {
         // 修改竞标状态
         Example example1 = new Example(Bid.class);
         example1.createCriteria().andEqualTo("taskId", taskId)
                 .andEqualTo("employeeId", employeeId);
         Bid bid1 = bidMapper.selectOneByExample(example1);
-        bid1.setBidStatus(BidStatus.BIT);
+        bid1.setBidStatus(bidStatus);
         bidMapper.updateByPrimaryKey(bid1);
     }
 }

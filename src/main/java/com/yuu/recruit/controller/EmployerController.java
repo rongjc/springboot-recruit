@@ -1,11 +1,9 @@
 package com.yuu.recruit.controller;
 
+import com.yuu.recruit.domain.Employee;
 import com.yuu.recruit.domain.Employer;
 import com.yuu.recruit.domain.Task;
-import com.yuu.recruit.service.BidService;
-import com.yuu.recruit.service.EmployerService;
-import com.yuu.recruit.service.TaskCategoryService;
-import com.yuu.recruit.service.TaskService;
+import com.yuu.recruit.service.*;
 import com.yuu.recruit.vo.TaskCategoryVo;
 import com.yuu.recruit.vo.TaskVo;
 import org.springframework.stereotype.Controller;
@@ -40,6 +38,9 @@ public class EmployerController {
 
     @Resource
     private BidService bidService;
+
+    @Resource
+    private ReferrerService referrerService;
 
     @Resource
     private EmployerService employerService;
@@ -241,6 +242,12 @@ public class EmployerController {
     public String acceptBid(Long taskId, Long employeeId) {
         bidService.acceptBid(taskId, employeeId);
         return "redirect:/employer/myTasks";
+    }
+
+    @GetMapping("changeBidStatus")
+    public String acceptBid(Long taskId, Long employeeId, Byte status) {
+        bidService.changeBidStatus(taskId, employeeId, status);
+        return "redirect:/employer/taskBidders?taskId="+taskId;
     }
 
     /**

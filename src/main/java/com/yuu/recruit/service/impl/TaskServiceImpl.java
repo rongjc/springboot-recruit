@@ -8,6 +8,7 @@ import com.yuu.recruit.consts.TaskStatus;
 import com.yuu.recruit.domain.*;
 import com.yuu.recruit.mapper.*;
 import com.yuu.recruit.result.PageResult;
+import com.yuu.recruit.service.ReferrerService;
 import com.yuu.recruit.service.TaskService;
 import com.yuu.recruit.utils.IDUtil;
 import com.yuu.recruit.vo.BidVo;
@@ -19,6 +20,7 @@ import tk.mybatis.mapper.entity.Example;
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -32,7 +34,8 @@ public class TaskServiceImpl implements TaskService {
 
     @Resource
     private TaskCategoryMapper taskCategoryMapper;
-
+    @Resource
+    private ReferrerService referrerService;
     @Resource
     private EmployeeMapper employeeMapper;
 
@@ -284,6 +287,16 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
+    public Boolean isApplied(Long taskId, Long employeeId) {
+        // 先查询所有任务集合
+        Example example = new Example(Employee.class);
+        example.createCriteria().andEqualTo("employerId", employeeId)
+                .andEqualTo("taskId", taskId);
+        List<Task> tasks = taskMapper.selectByExample(example);
+        return tasks.size() >0;
+    }
+
+    @Override
     public List<TaskVo> getRecentlySubmit(Long id) {
         // 先查询所有任务集合
         Example example = new Example(Task.class);
@@ -382,6 +395,7 @@ public class TaskServiceImpl implements TaskService {
      */
     private List<TaskVo> tasksToTaskVos(List<Task> tasks) {
         List<TaskVo> taskVos = new ArrayList<>();
+        HashMap<Long, List<Employee>> referrerMap = new HashMap<Long, List<Employee>>();
         for (Task task : tasks) {
             TaskVo taskVo = new TaskVo();
             // 调用 Spring 提供的工具类复制相同的属性
@@ -414,32 +428,17 @@ public class TaskServiceImpl implements TaskService {
             List<BidVo> bidVos = findTaskBids(task);
             taskVo.setBidVos(bidVos);
 
+            for(BidVo bid : bidVos){
+                List<Employee> employee = referrerService.getAllReferrer(task.getId(), bid.getEmployee().getId());
+                bid.setReferrer(employee);
+            }
+
             // 计算平均竞标价格
             // 总竞标价格
             Double totalPrice = 0.0;
             Double avgPrice = 0.0;
-            if (bidVos.size() != 0) {
-                for (BidVo bidVo : bidVos) {
-                    totalPrice += bidVo.getBidPrice();
-                }
-                avgPrice = totalPrice / bidVos.size();
-            }
             taskVo.setAvgPrice(avgPrice);
-
             // 如果任务属于未完成状态，计算到期时间和剩余完成时间
-            if (task.getTaskStatus().equals(TaskStatus.BIT)) {
-                // 计算到期时间
-                // 获取该任务中标雇员
-                Long employeeId = task.getEmployeeId();
-                // 查询任务中标信息，查询到期时间
-                Example example = new Example(Bid.class);
-                example.createCriteria().andEqualTo("employeeId", employeeId)
-                        .andEqualTo("taskId", task.getId());
-                Bid bid = bidMapper.selectOneByExample(example);
-                // 获取到期时间
-                Date expireTime = bid.getDeliveryTime();
-                taskVo.setExpireTime(expireTime);
-            }
 
             // 添加到集合中
             taskVos.add(taskVo);

@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.util.List;
 
@@ -140,7 +141,10 @@ public class IndexController {
      * @return
      */
     @GetMapping("login")
-    public String login() {
+    public String login(String callback, HttpSession session) {
+        if(callback != null && callback.isEmpty()==false){
+            session.setAttribute("callback", callback);
+        }
         return "login";
     }
 
@@ -154,11 +158,19 @@ public class IndexController {
      * @return
      */
     @PostMapping("login")
-    public String login(Integer accountType, String username, String password, RedirectAttributes redirectAttributes, HttpSession session) {
+    public String login(final HttpServletRequest request, Integer accountType, String username, String password, RedirectAttributes redirectAttributes, HttpSession session
+    ) {
         // 如果传过来的 accountType 为 0 则为雇员登录
+        String referrer = request.getHeader("referer");
+        String callback = "";
+        if (session.getAttribute("callback")!= null)
+            callback = session.getAttribute("callback").toString();
         if (accountType == 0) {
             // 雇员登录
             Employee employee = employeeService.login(username, password);
+
+
+
             // 如果雇员不为 null 登录成功
             if (employee != null) {
                 // 将登录信息放入 session 中
@@ -166,7 +178,12 @@ public class IndexController {
                 // 注销雇主登录信息
                 session.removeAttribute("employer");
                 // 重定向到首页
-                return "redirect:/index";
+                if(callback.isEmpty()== false) {
+                    session.removeAttribute("callback");
+                    return "redirect:" + callback;
+                }
+                else
+                    return "redirect:/index";
             }
 
             // 登录失败
@@ -188,7 +205,12 @@ public class IndexController {
                 // 注销雇员登录信息
                 session.removeAttribute("employee");
                 // 重定向到首页
-                return "redirect:/index";
+                if(callback.isEmpty()== false) {
+                    session.removeAttribute("callback");
+                    return "redirect:" + callback;
+                }
+                else
+                    return "redirect:/index";
             }
 
             // 登录失败

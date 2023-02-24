@@ -1,8 +1,10 @@
 package com.yuu.recruit.controller;
 
 import com.yuu.recruit.domain.Employee;
+import com.yuu.recruit.domain.Referrer;
 import com.yuu.recruit.result.PageResult;
 import com.yuu.recruit.service.EmployeeBookmarkedService;
+import com.yuu.recruit.service.ReferrerService;
 import com.yuu.recruit.service.TaskCategoryService;
 import com.yuu.recruit.service.TaskService;
 import com.yuu.recruit.vo.TaskCategoryVo;
@@ -12,8 +14,10 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +42,10 @@ public class TaskController {
 
     @Resource
     private EmployeeBookmarkedService employeeBookmarkedService;
+
+    @Resource
+    private ReferrerService referrerService;
+    private Employee employee;
 
     /**
      * 跳转到分类列表页
@@ -88,11 +96,24 @@ public class TaskController {
      * @return
      */
     @GetMapping("page")
-    public String page(@RequestParam(required = true) Long taskId, Model model) {
+    public String page(final HttpServletRequest request,HttpSession session, @RequestParam(required = true) Long taskId, @RequestParam(required = false) Long referrerId, Model model) {
         // 根据任务 ID 查询出任务详情
+        final String baseUrl =
+                ServletUriComponentsBuilder.fromCurrentContextPath().build().toUriString();
+        Employee employee = (Employee) session.getAttribute("employee");
         TaskVo taskVo = taskService.getById(taskId);
+        String callback = String.valueOf(request.getRequestURL().append('?').append(request.getQueryString()));
+//        String callback = baseUrl;
+        if(callback.isEmpty()==false){
+//            session.addAttribute("callback", callback);
+        }
         // 放入域对象中，提供给页面查询
         model.addAttribute("task", taskVo);
+        model.addAttribute("employee", employee);
+        model.addAttribute("callback", callback);
+        if(referrerId != null && employee !=null && referrerId != employee.getId()){
+            referrerService.record(taskId, employee.getId(),referrerId);
+        }
         return "task_page";
     }
 

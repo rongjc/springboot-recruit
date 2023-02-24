@@ -34,6 +34,7 @@ public class WebAppConfigure implements WebMvcConfigurer {
         loginRegistration.addPathPatterns("/employee/**");
         // 排除雇员介绍页
         loginRegistration.excludePathPatterns("/employee/profile/**");
+//        loginRegistration.addPathPatterns("/task/**");
 
         // 前台系统雇主登录拦截
         InterceptorRegistration employerRegistration = registry.addInterceptor(new EmployerLoginInterceptor());

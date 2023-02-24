@@ -37,14 +37,11 @@ public class EmployeeBidController {
      * 雇员投标任务
      *
      * @param taskId 任务 ID
-     * @param bidPrice 投标价格
-     * @param timeNumber 完成时间
-     * @param timType 完成时间类型
      * @param session
      * @return
      */
     @PostMapping("employee/bid")
-    public String bid(Long taskId, Double bidPrice, int timeNumber, String timeType, HttpSession session, RedirectAttributes redirectAttributes) {
+    public String bid(Long taskId, HttpSession session, RedirectAttributes redirectAttributes) {
         // 获取 session 中的雇员信息
         Employee employee = (Employee) session.getAttribute("employee");
 
@@ -52,7 +49,7 @@ public class EmployeeBidController {
         boolean flag = bidService.getBidByTaskIdAndEmployeeId(taskId, employee.getId());
         if (flag) {
             // 该雇员已经投标过该任务，返回错误信息
-            redirectAttributes.addFlashAttribute("msg", "您已投标过该任务！");
+            redirectAttributes.addFlashAttribute("msg", "You have already applied the job！");
             // 重定向到任务页面
             return "redirect:/task/page?taskId=" + taskId;
         }
@@ -62,21 +59,7 @@ public class EmployeeBidController {
         bid.setId(IDUtil.getRandomId());
         bid.setTaskId(taskId);
         bid.setEmployeeId(employee.getId());
-        bid.setBidPrice(bidPrice);
-        String deliveryDesc = timeNumber + timeType;
-        bid.setDeliveryDesc(deliveryDesc);
         bid.setBidStatus(BidStatus.NO_BIT);
-
-        // 计算到期时间
-        Date deliveryTime = null;
-        if ("小时".equals(timeType)) {
-            deliveryTime = DateUtil.offset(new Date(), DateField.HOUR, timeNumber);
-        } else if ("天".equals(timeType)) {
-            deliveryTime = DateUtil.offset(new Date(), DateField.DAY_OF_MONTH, timeNumber);
-        } else if ("月".equals(timeType)) {
-            deliveryTime = DateUtil.offset(new Date(), DateField.MONTH, timeNumber);
-        }
-        bid.setDeliveryTime(deliveryTime);
 
         // 设置创建时间
         bid.setCreateTime(new Date());

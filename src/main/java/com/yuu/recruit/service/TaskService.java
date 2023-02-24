@@ -102,6 +102,7 @@ public interface TaskService {
      */
     void bidTask(Long id, Long taskId);
 
+    Boolean isApplied(Long taskId, Long employeeId);
     /**
      * 雇员提交任务
      *

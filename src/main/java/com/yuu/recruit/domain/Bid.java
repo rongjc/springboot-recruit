@@ -29,25 +29,6 @@ public class Bid implements Serializable {
      */
     @Column(name = "employee_id")
     private Long employeeId;
-
-    /**
-     * 投标价格
-     */
-    @Column(name = "bid_price")
-    private Double bidPrice;
-
-    /**
-     * 交货时间描述，例如 1 天
-     */
-    @Column(name = "delivery_desc")
-    private String deliveryDesc;
-
-    /**
-     * 交货时间
-     */
-    @Column(name = "delivery_time")
-    private Date deliveryTime;
-
     /**
      * 竞标状态
      */

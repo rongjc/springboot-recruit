@@ -49,6 +49,8 @@ public interface BidService {
      * @param employeeId 雇员 ID
      */
     void acceptBid(Long taskId, Long employeeId);
+
+    void changeBidStatus(Long taskId, Long employeeId, Byte bitStatus);
 }
 
 

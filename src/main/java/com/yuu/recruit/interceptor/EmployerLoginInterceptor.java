@@ -21,6 +21,10 @@ public class EmployerLoginInterceptor implements HandlerInterceptor {
         HttpSession session = request.getSession();
         // 从 session 中获取雇员登录信息
         Employer employer = (Employer) session.getAttribute("employer");
+        String callback = String.valueOf(request.getRequestURL().append('?').append(request.getQueryString()));
+        if(callback.isEmpty()==false){
+            session.setAttribute("callback", callback);
+        }
         // 未登录
         if (employer == null) {
             // ajax 请求返回 401

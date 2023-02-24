@@ -16,4 +16,12 @@ public class BidStatus {
      * 已中标
      */
     public static final Byte BIT = 1;
+
+    public static final Byte CV_SUBMITTED = 0;
+
+    public static final Byte INTERVIEW = 1;
+
+    public static final Byte OFFER = 2;
+
+    public static final Byte ONBOARD = 3;
 }
